@@ -1,0 +1,72 @@
+1. db.people.aggregate([
+  {$group: {
+    _id: null,
+    averageAge: {$avg: '$age'}
+  }}]);
+
+2. db.people.aggregate([
+  {$group: {
+    _id: '$gender',
+    avg_age: {$avg: '$age'}
+  }}]);
+
+3. db.people.aggregate([
+  {$group: {
+    _id: '$gender',
+    avg_age: {$avg: '$age'}
+  }},
+  {
+    $project: {
+      _id: 0,
+      gender: '$_id',
+      avg_age: 1
+    }
+  }]);
+
+4.db.people.aggregate([
+  {$sort: {age: -1}},
+  {$limit: 3},
+  {$project: {
+    _id: 0,
+    first_name: 1,
+    last_name: 1,
+    age: 1
+  }}]);
+
+5. db.people.aggregate([
+  {$sort: {age: 1}},
+  {$limit: 5},
+  {$project:{
+    _id: 0,
+    name: {$concat: ['$first_name', ' ', '$last_name']},
+    age: 1
+  }}]);
+
+6. db.people.aggregate([{$group:{_id: null, averagenumofChildren:{$avg:{$size:"$children"}}}}])
+
+7. db.people.aggregate([
+  {
+    $unwind: "$children"  // Unwind the "children" array
+  },
+  {
+    $match: {  // Filter documents where "state" is "Michigan" and "age" is less than 10
+      "state": "Michigan",
+      "children.age": { $lt: 10 }
+    }
+  },
+  {
+    $project: {  // Project only the "name" and "age" fields of the matching children
+      "name": "$children.name",
+      "age": "$children.age"
+    }
+  }
+])
+
+8. db.people.aggregate([
+  { $unwind: "$children" }, 
+  { $group: {
+      _id: "$state",
+      avgAge: { $avg: "$children.age" } 
+  }},
+  { $sort: { avgAge: -1 } } 
+])
