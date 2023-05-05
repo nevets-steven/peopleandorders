@@ -70,3 +70,113 @@
   }},
   { $sort: { avgAge: -1 } } 
 ])
+
+9. db.orders.aggregate([
+  {
+    $group: {
+      _id: null,
+      totalSales: { $sum: "$total" }
+    }
+  }
+])
+
+10. db.orders.aggregate([
+  {
+    $match: {
+      date: "2017-05-22"
+    }
+  },
+  {
+    $group: {
+      _id: null,
+      totalSales: { $sum: "$total" }
+    }
+  }
+])
+
+11. db.orders.aggregate([
+  {
+  $group: {
+    _id: {
+      $concat: [
+        { $substr: ["$date", 0, 4] },
+        "-",
+        { $substr: ["$date", 5, 2] },
+        "-",
+        { $substr: ["$date", 8, 2] }
+      ]
+    },
+    orders: { $sum: 1 }
+  }
+}
+])
+
+12. db.sales.aggregate([
+  {
+    $group: {
+      _id: {
+        $concat: [
+          { $substr: ["$date", 0, 4] },
+          "-",
+          { $substr: ["$date", 5, 2] },
+          "-",
+          { $substr: ["$date", 8, 2] }
+        ]
+      },
+      totalSales: { $sum: "$amount" }
+    }
+  },
+  {
+    $sort: {
+      totalSales: -1
+    }
+  },
+  {
+    $limit: 1
+  }
+])
+
+13. db.sales.aggregate([
+  {
+    $group: {
+      _id: "$product",
+      quantitySold: { $sum: "$quantity" }
+    }
+  },
+  {
+    $sort: {
+      quantitySold: -1
+    }
+  },
+  {
+    $limit: 3
+  }
+])
+
+14. db.orders.aggregate([
+  {
+    $unwind: "$items"
+  },
+  {
+    $group: {
+      _id: "$items.product",
+      revenue: { $sum: { $multiply: [ "$items.price", "$items.count" ] } }
+    }
+  },
+  {
+    $sort: {
+      revenue: -1
+    }
+  },
+  {
+    $limit: 1
+  },
+  {
+    $project: {
+      _id: 0,
+      productName: "$_id",
+      revenue: 1
+    }
+  }
+])
+
